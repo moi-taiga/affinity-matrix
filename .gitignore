@@ -1,0 +1,7 @@
+data/*
+output/*
+scratch.py
+# ignore pycache files in the scripts directory
+scripts/__pycache__/*
+# ignore slurm output files
+output*
