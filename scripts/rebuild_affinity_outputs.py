@@ -31,10 +31,14 @@ import pandas as pd
 import scipy.sparse as sp
 import scanpy as sc
 import seaborn as sns
-import umap
 from sklearn.decomposition import PCA
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import StandardScaler
+
+try:
+    import umap
+except Exception:
+    umap = None
 
 
 DEFAULT_SEVEN_CELLTYPES = ["CD8 T", "Mono", "B", "DC", "NK", "other T", "CD4 T"]
@@ -299,6 +303,11 @@ def _pca_embedding(distance_frame: pd.DataFrame) -> pd.DataFrame:
 
 
 def _umap_embedding(distance_frame: pd.DataFrame) -> pd.DataFrame:
+    if umap is None:
+        values = StandardScaler().fit_transform(distance_frame.values)
+        coords = PCA(n_components=2, random_state=0).fit_transform(values)
+        return pd.DataFrame(coords, index=distance_frame.index, columns=["UMAP1", "UMAP2"])
+
     n_samples = distance_frame.shape[0]
     neighbors = max(2, min(5, n_samples - 1))
     reducer = umap.UMAP(metric="precomputed", random_state=0, n_neighbors=neighbors, min_dist=0.25)
